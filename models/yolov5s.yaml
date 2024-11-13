@@ -1,0 +1,520 @@
+# # YOLOv5 🚀 by Ultralytics, AGPL-3.0 license
+
+# Parameters
+# nc: 1  # number of classes
+# depth_multiple: 1.0  # model depth multiple (adjust to match ResNet-18)
+# width_multiple: 1.0  # layer channel multiple (adjust to match ResNet-18)
+# anchors:
+#   - [10,13, 16,30, 33,23]  # P3/8
+#   - [30,61, 62,45, 59,119]  # P4/16
+#   - [116,90, 156,198, 373,326]  # P5/32
+
+# # # YOLOv5 backbone (ResNet-18)
+# backbone:
+#   # [from, number, module, args]
+#   [
+#     [-1, 1, Conv, [64, 7, 2, 3]],  # Initial convolution
+#     [-1, 1, nn.MaxPool2d, [3, 2, 1]],  # Maxpool layer
+#     [-1, 1, BasicBlock, [64]],  # ResNet BasicBlock with 64 channels
+#     [-1, 2, BasicBlock, [64]],  # Two more BasicBlocks with 64 channels
+
+#     [-1, 1, Conv, [128, 3, 2, 1]],  # Conv layer with stride 2
+#     [-1, 2, BasicBlock, [128]],  # Two BasicBlocks with 128 channels
+#     [-1, 1, Conv, [256, 3, 2, 1]],  # Conv layer with stride 2
+#     [-1, 2, BasicBlock, [256]],  # Two BasicBlocks with 256 channels
+#     [-1, 1, Conv, [512, 3, 2, 1]],  # Conv layer with stride 2
+#     [-1, 2, BasicBlock, [512]],  # Two BasicBlocks with 512 channels
+#   ]
+
+# # YOLOv5 head
+# head:
+#   [[-1, 1, Conv, [512, 1, 1]],
+#    [-1, 1, nn.Upsample, [None, 2, 'nearest']],
+#    [[-1, 6], 1, Concat, [1]],  # cat backbone P4
+#    [-1, 3, C3, [512, False]],  # 13
+
+#    [-1, 1, Conv, [256, 1, 1]],
+#    [-1, 1, nn.Upsample, [None, 2, 'nearest']],
+#    [[-1, 4], 1, Concat, [1]],  # cat backbone P3
+#    [-1, 3, C3, [256, False]],  # 17 (P3/8-small)
+
+#    [-1, 1, Conv, [256, 3, 2]],
+#    [[-1, 14], 1, Concat, [1]],  # cat head P4
+#    [-1, 3, C3, [512, False]],  # 20 (P4/16-medium)
+
+#    [-1, 1, Conv, [512, 3, 2]],
+#    [[-1, 10], 1, Concat, [1]],  # cat head P5
+#    [-1, 3, C3, [1024, False]],  # 23 (P5/32-large)
+
+#    [[17, 20, 23], 1, Detect, [nc, anchors]],  # Detect(P3, P4, P5)
+#   ]
+# # time 1
+#   100 epochs completed in 2.297 hours.
+# Optimizer stripped from runs/train/exp31/weights/last.pt, 67.1MB
+# Optimizer stripped from runs/train/exp31/weights/best.pt, 67.1MB
+
+# Validating runs/train/exp31/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 199 layers, 33290422 parameters, 0 gradients, 76.1 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.16it/s]
+#                    all        150        256       0.65      0.471      0.509      0.216
+
+# time 2 cái naỳ là chỉnh threshold với iou cao hơn
+
+# 100 epochs completed in 2.334 hours.
+# Optimizer stripped from runs/train/exp32/weights/last.pt, 67.1MB
+# Optimizer stripped from runs/train/exp32/weights/best.pt, 67.1MB
+
+# Validating runs/train/exp32/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 199 layers, 33290422 parameters, 0 gradients, 76.1 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.00it/s]
+#                    all        150        256      0.581      0.504      0.497      0.218
+
+# time 3 dataset khác fire-8 still res yolov5 time 1
+
+# 100 epochs completed in 0.580 hours.
+# Optimizer stripped from runs/train/exp42/weights/last.pt, 67.1MB
+# Optimizer stripped from runs/train/exp42/weights/best.pt, 67.1MB
+
+# Validating runs/train/exp42/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 199 layers, 33301192 parameters, 0 gradients, 76.1 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 2/2 [00:00<00:00,  3.10it/s]
+#                    all         47         48      0.871       0.86      0.895      0.424
+#                   Fire         47         18      0.793      0.853      0.888      0.372
+#                  smoke         47         30       0.95      0.867      0.902      0.475
+
+# nc: 3  # number of classes
+# depth_multiple: 0.33  # model depth multiple (adjust to match ResNet-18)
+# width_multiple: 0.50  # layer channel multiple (adjust to match ResNet-18)
+# anchors:
+#   - [10,13, 16,30, 33,23]  # P3/8
+#   - [30,61, 62,45, 59,119]  # P4/16
+#   - [116,90, 156,198, 373,326]  # P5/32
+# 100 epochs completed in 0.186 hours.
+# Optimizer stripped from runs/train/exp44/weights/last.pt, 9.8MB
+# Optimizer stripped from runs/train/exp44/weights/best.pt, 9.8MB
+
+# Validating runs/train/exp44/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 123 layers, 4725000 parameters, 0 gradients, 11.6 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 2/2 [00:00<00:00,  4.45it/s]
+#                    all         47         48      0.668      0.767      0.706      0.332
+#                   Fire         47         18       0.78      0.833      0.848      0.365
+#                  smoke         47         30      0.556        0.7      0.564        0.3
+
+# 100 epochs completed in 0.572 hours. time 2 for res yolov5
+# Optimizer stripped from runs/train/exp45/weights/last.pt, 67.1MB
+# Optimizer stripped from runs/train/exp45/weights/best.pt, 67.1MB
+
+# Validating runs/train/exp45/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 199 layers, 33301192 parameters, 0 gradients, 76.1 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 2/2 [00:00<00:00,  3.31it/s]
+#                    all         47         48      0.808      0.689      0.858      0.424
+#                   Fire         47         18      0.808      0.611      0.815      0.364
+#                  smoke         47         30      0.808      0.767      0.901      0.483
+
+# Train on fire's dataset
+
+# 100 epochs completed in 2.271 hours.
+# Optimizer stripped from runs/train/exp47/weights/last.pt, 67.1MB
+# Optimizer stripped from runs/train/exp47/weights/best.pt, 67.1MB
+
+# Validating runs/train/exp47/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 199 layers, 33295807 parameters, 0 gradients, 76.1 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.18it/s]
+#                    all        150        256      0.697       0.43       0.52      0.215
+#                   Fire        150        256      0.697       0.43       0.52      0.215
+
+# 100 epochs completed in 0.759 hours.
+# Optimizer stripped from runs/train/exp3/weights/last.pt, 9.8MB
+# Optimizer stripped from runs/train/exp3/weights/best.pt, 9.8MB
+
+# Validating runs/train/exp3/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 123 layers, 4719606 parameters, 0 gradients, 11.6 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.83it/s]
+#                    all        150        256      0.537       0.48       0.49      0.201
+
+# Parameters
+# nc: 1 # number of classes - xem lại
+# # đã chỉnh sử thành 1
+# depth_multiple: 0.33 # model depth multiple
+# width_multiple: 0.50 # layer channel multiple
+# anchors:
+#   - [10, 13, 16, 30, 33, 23] # P3/8
+#   - [30, 61, 62, 45, 59, 119] # P4/16
+#   - [116, 90, 156, 198, 373, 326] # P5/32
+
+# # YOLOv5 v6.0 backbone
+# backbone:
+#   # [from, number, module, args]
+#   [
+#     [-1, 1, Conv, [64, 6, 2, 2]], # 0-P1/2
+#     [-1, 1, Conv, [128, 3, 2]], # 1-P2/4
+#     [-1, 3, C3, [128]],
+
+#     [-1, 1, Conv, [256, 3, 2]], # 3-P3/8
+#     [-1, 6, C3, [256]],
+
+#     [-1, 1, Conv, [512, 3, 2]], # 5-P4/16
+#     [-1, 9, C3, [512]],
+
+#     [-1, 1, Conv, [1024, 3, 2]], # 7-P5/32
+#     [-1, 3, C3, [1024]],
+#     [-1, 3, CBAM, [512, 512,3]],
+#     [-1, 1, SPPF, [1024, 5]], # 9
+#   ]
+
+# # YOLOv5 v6.0 head
+# head: [
+#     [-1, 1, Conv, [512, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 6], 1, Concat, [1]], # cat backbone P4
+#     [-1, 3, C3, [512, False]], # 13
+
+#     [-1, 1, Conv, [256, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 4], 1, Concat, [1]], # cat backbone P3
+#     [-1, 3, C3, [256, False]], # 17 (P3/8-small)
+#     [-1, 3, CBAM, [128, 128, 3]], # 17 (P3/8-small)
+
+#     [-1, 1, Conv, [256, 3, 2]],
+#     [[-1, 14], 1, Concat, [1]], # cat head P4
+#     [-1, 3, C3, [512, False]], # 20 (P4/16-medium)
+#     [-1, 3, CBAM, [256, 256, 3]], # 17 (P3/8-small)
+
+#     [-1, 1, Conv, [512, 3, 2]],
+#     [[-1, 10], 1, Concat, [1]], # cat head P5
+#     [-1, 3, C3, [1024, False]], # 23 (P5/32-large)
+#     [-1, 3, CBAM, [512, 512, 3]], # 17 (P3/8-small)
+
+#     [[17, 20, 23], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5)
+#   ]
+
+# 100 epochs completed in 1.099 hours.
+# Optimizer stripped from runs/train/exp6/weights/last.pt, 17.5MB
+# Optimizer stripped from runs/train/exp6/weights/best.pt, 17.5MB
+
+# Validating runs/train/exp6/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 172 layers, 8530152 parameters, 0 gradients, 17.1 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:02<00:00,  2.36it/s]
+#                    all        150        256      0.671      0.395      0.469      0.206
+
+# Long hahah
+
+# 100 epochs completed in 1.097 hours.
+# Optimizer stripped from runs/train/exp18/weights/last.pt, 14.4MB
+# Optimizer stripped from runs/train/exp18/weights/best.pt, 14.4MB
+
+# Validating runs/train/exp18/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 157 layers, 7015519 parameters, 0 gradients, 15.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.48it/s]
+#                    all        150        256      0.519      0.461      0.488        0.2
+#                   fire        150        256      0.519      0.461      0.488        0.2
+
+# 100 epochs completed in 0.267 hours.
+# Optimizer stripped from runs/train/exp43/weights/last.pt, 14.5MB
+# Optimizer stripped from runs/train/exp43/weights/best.pt, 14.5MB
+
+# Validating runs/train/exp43/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 157 layers, 7018216 parameters, 0 gradients, 15.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 2/2 [00:00<00:00,  4.67it/s]
+#                    all         47         48      0.912      0.673      0.795       0.33
+#                   Fire         47         18       0.87      0.667      0.738      0.241
+#                  smoke         47         30      0.953      0.678      0.851      0.419
+
+
+# Train on fire's dataset
+
+# 100 epochs completed in 1.061 hours.
+# Optimizer stripped from runs/train/exp48/weights/last.pt, 14.4MB
+# Optimizer stripped from runs/train/exp48/weights/best.pt, 14.4MB
+
+# Validating runs/train/exp48/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 157 layers, 7015519 parameters, 0 gradients, 15.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.70it/s]
+#                    all        150        256      0.555      0.527      0.498      0.206
+#                   Fire        150        256      0.555      0.527      0.498      0.206
+
+# 137 epochs completed in 1.440 hours.
+# Optimizer stripped from runs/train/exp/weights/last.pt, 14.4MB
+# Optimizer stripped from runs/train/exp/weights/best.pt, 14.4MB
+
+# Validating runs/train/exp/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 157 layers, 7012822 parameters, 0 gradients, 15.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.81it/s]
+#                    all        150        256       0.63      0.434      0.483      0.208
+
+# RepVGG-yolov5
+
+# nc: 2 # number of classes - xem lại
+# depth_multiple: 0.33 # model depth multiple
+# width_multiple: 0.50 # layer channel multiple
+# anchors:
+#   - [10, 13, 16, 30, 33, 23] # P3/8
+#   - [30, 61, 62, 45, 59, 119] # P4/16
+#   - [116, 90, 156, 198, 373, 326] # P5/32
+
+# # YOLOv5 v6.0 backbone
+# backbone:
+#   # [from, number, module, args]
+#   [
+#     [-1, 1, Focus, [32, 3]],
+#     [-1, 1, Conv, [64, 3, 2]], # 0-P1/2
+#     [-1, 1, Conv, [64, 1, 2]], # 1-P2/4
+#     [-1, 3, C3, [64]],
+
+#     [-1, 1, Conv, [128, 3, 2]], # 3-P3/8
+#     [-1, 1, Conv, [128, 1, 2]], # 3-P3/8
+#     [-1, 6, C3, [128]],
+
+#     [-1, 1, Conv, [256, 1, 2]], # 5-P4/16 
+#     [-1, 1, Conv, [256, 3, 2]], # 5-P4/16 
+#     [-1, 9, C3, [256]],
+
+#     [-1, 1, Conv, [512, 3, 2]], # 7-P5/32
+#     [-1, 1, Conv, [512, 1, 2]], # 7-P5/32
+
+#     # Phải thêm vào đây Conv
+
+#     [-1, 1, SPPF, [512]], # 9
+#     [-1, 3, C3, [512]],
+#   ]
+
+# # YOLOv5 v6.0 head
+# head: [
+#     [-1, 1, Conv, [128, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 6], 1, Concat, [0]], # cat backbone P4
+#     [-1, 3, C3, [128]], # 13
+
+#     [-1, 1, Conv, [128, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 4], 1, Concat, [0]], # cat backbone P3s
+#     [-1, 3, C3, [128]], # 17 (P3/8-small)
+
+#     [-1, 1, Conv, [128, 3, 2]], #Phải xem ở đây
+#     [-1, 1, Conv, [128, 1, 2]],
+#     [[-1, 14], 1, Concat, [0]], # cat head P4
+#     [-1, 3, C3, [128]], # 20 (P4/16-medium)
+
+#     [-1, 1, Conv, [128, 3, 2]], #Phải xem ở đây
+#     [-1, 1, Conv, [128, 1, 2]], #Phải xem ở đây
+#     [[-1, 10], 1, Concat, [0]], # cat head P5
+#     [-1, 3, C3, [128]], # 23 (P5/32-large)
+
+#     [[17, 20, 23], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5)
+#   ]
+
+# backbone : [
+#     [-1, 1, Focus, [32, 3]],  # Focus(32, 3)
+#     [-1, 1, Conv, [64, 1, 2]],  # Conv(64, 1, 2)
+#     [-1, 1, Conv, [64, 3, 2]],  # Conv(64, 3, 2)
+#     [-1, 1, C3, [64]],  # C3(64)
+#     [-1, 1, Conv, [128, 1, 2]],  # Conv(128, 1, 2)
+#     [-1, 1, Conv, [128, 3, 2]],  # Conv(128, 3, 2)
+#     [-1, 3, C3, [128]],  # C3(128)
+#     [-1, 1, Conv, [256, 1, 2]],  # Conv(256, 1, 2)
+#     [-1, 1, Conv, [256, 3, 2]],  # Conv(256, 3, 2)
+#     [-1, 3, C3, [256]],  # C3(256)
+#     [-1, 1, Conv, [512, 1, 2]],  # Conv(512, 1, 2)
+#     [-1, 1, Conv, [512, 3, 2]],  # Conv(512, 3, 2)
+#     [-1, 1, SPPF, [512]],  # SPPF(512)
+#     [-1, 3, C3, [512]],  # C3(512)
+# ]
+
+# # RepVGG-YOLOv5 Head
+# head : [
+#     [-1, 1, Conv, [128, 1, 1]],  # Conv(128, 1, 1)
+#     [-1, 1, nn.Upsample, [None, 2, 'nearest']],  # Upsample
+#     [[-1, 6], 1, Concat, [1]],  # Concat backbone P4
+#     [-1, 3, C3, [128]],  # C3(128)
+#     [-1, 1, Conv, [128, 3, 2]],  # Conv(128, 3, 2)
+#     [-1, 1, Conv, [128, 1, 2]],  # Conv(128, 1, 2)
+#     [[-1, 14], 1, Concat, [1]],  # Concat head P4
+#     [-1, 3, C3, [128]],  # C3(128)
+#     [-1, 1, Conv, [128, 1, 1]],  # Conv(128, 1, 1)
+#     [-1, 1, nn.Upsample, [None, 2, 'nearest']],  # Upsample
+#     [[-1, 4], 1, Concat, [1]],  # Concat backbone P3
+#     [-1, 3, C3, [128]],  # C3(128)
+#     [-1, 1, Conv, [128, 3, 2]],  # Conv(128, 3, 2)
+#     [-1, 1, Conv, [128, 1, 2]],  # Conv(128, 1, 2)
+#     [[-1, 10], 1, Concat, [1]],  # Concat head P5
+#     [-1, 3, C3, [128]],  # C3(128)
+#     [[17, 20, 23], 1, Detect, [nc, anchors]],  # Detect(P3, P4, P5)
+# ]
+
+# Điều chỉnh số lượng channels và anchors
+# nc: 2  # number of classes
+# depth_multiple: 0.33  # to reduce number of layers
+# width_multiple: 0.5  # to reduce number of channels
+# anchors:
+#     - [10, 13, 16, 30]  # P3/8
+#     - [30, 61]  # P4/16
+#     - [116, 198]  # P5/32
+
+# # Thay đổi backbone từ ResNet-18 sang MobileNetV2
+# backbone:
+#     # [from, number, module, args]
+#     [[-1, 1, Conv, [32, 3, 2]],  # 0
+#      [-1, 1, Conv, [32, 3, 1]],  # 2-1
+#      [-1, 1, Conv, [16, 1, 1]],  # 2-2
+#      [-1, 5, Bottleneck, [16, 24, 2, 2]],  # 3-7
+#      [-1, 1, Conv, [96, 1, 1]],  # 8
+#      [-1, 7, Bottleneck, [96, 144, 2, 2]],  # 9-15
+#      [-1, 1, Conv, [192, 1, 1]],  # 16
+#      [-1, 1, nn.MaxPool2d, [2, 2]],
+#      [-1, 1, Conv, [192, 1, 1]],  # 18
+#     ]
+
+# # Điều chỉnh đầu ra của mô hình
+# head:
+#     [[-1, 1, Conv, [192, 1, 1]],
+#      [-1, 1, nn.Upsample, [None, 2, 'nearest']],
+#      [[-1, 6], 1, Concat, [1]],  # cat backbone P4
+#      [-1, 3, C3, [128, False]],  # 13
+#      [-1, 1, Conv, [64, 1, 1]],
+#      [-1, 1, nn.Upsample, [None, 2, 'nearest']],
+#      [[-1, 4], 1, Concat, [1]],  # cat backbone P3
+#      [-1, 3, C3, [64, False]],  # 17 (P3/8-small)
+#      [-1, 1, Conv, [64, 3, 2]],
+#      [[-1, 14], 1, Concat, [1]],  # cat head P4
+#      [-1, 3, C3, [128, False]],  # 20 (P4/16-medium)
+#      [-1, 1, Conv, [128, 3, 2]],
+#      [[-1, 10], 1, Concat, [1]],  # cat head P5
+#      [-1, 3, C3, [256, False]],  # 23 (P5/32-large)
+#      [[17, 20, 23], 1, Detect, [nc, anchors]],  # Detect(P3, P4, P5)
+#     ]
+
+
+# Parameters
+nc: 1 # number of classes - xem lại
+depth_multiple: 0.33 # model depth multiple
+width_multiple: 0.50 # layer channel multiple
+anchors:
+  - [10, 13, 16, 30, 33, 23] # P3/8
+  - [30, 61, 62, 45, 59, 119] # P4/16
+  - [116, 90, 156, 198, 373, 326] # P5/32
+
+# YOLOv5 v6.0 backbone
+backbone:
+  # [from, number, module, args]
+  [
+    [-1, 1, Conv, [64, 7, 2, 3]],  # Initial convolution
+    [-1, 1, nn.MaxPool2d, [3, 2, 1]],  # Maxpool layer
+    [-1, 1, BasicBlock, [64]],  # ResNet BasicBlock with 64 channels
+    [-1, 2, BasicBlock, [64]],  # Two more BasicBlocks with 64 channels
+
+    [-1, 1, Conv, [128, 3, 2, 1]],  # Conv layer with stride 2
+    [-1, 2, BasicBlock, [128]],  # Two BasicBlocks with 128 channels
+    [-1, 1, Conv, [256, 3, 2, 1]],  # Conv layer with stride 2
+    [-1, 2, BasicBlock, [256]],  # Two BasicBlocks with 256 channels
+    [-1, 1, Conv, [512, 3, 2, 1]],  # Conv layer with stride 2
+    [-1, 2, BasicBlock, [512]],  # Two BasicBlocks with 512 channels
+  ]
+
+# YOLOv5 v6.0 head
+head: [
+    [-1, 1, Conv, [256, 1, 1]],
+    [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+    [[-1, 6], 1, Concat, [1]], # cat backbone P4
+    [-1, 3, C3, [256, False]], # 13
+
+    [-1, 1, Conv, [256, 1, 1]],
+    [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+    [[-1, 4], 1, Concat, [1]], # cat backbone P3
+    [-1, 3, C3, [256, False]], # 17 (P3/8-small)
+    [-1, 3, CBAM, [128, 128,3]],
+
+    [-1, 1, Conv, [256, 3, 2]],
+    [[-1, 14], 1, Concat, [1]], # cat head P4
+    [-1, 3, C3, [512, False]], # 20 (P4/16-medium)
+    [-1, 3, CBAM, [256, 256,3]],
+
+    [-1, 1, Conv, [512, 3, 2]],
+    [[-1, 10], 1, Concat, [1]], # cat head P5
+    [-1, 3, C3, [1024, False]], # 23 (P5/32-large)
+    [-1, 3, CBAM, [512, 512,3]],
+
+    [[17, 20, 23], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5)
+  ]
+
+# 100 epochs completed in 0.821 hours.
+# Optimizer stripped from runs/train/exp53/weights/last.pt, 6.5MB
+# Optimizer stripped from runs/train/exp53/weights/best.pt, 6.5MB
+
+# Validating runs/train/exp53/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 123 layers, 3074175 parameters, 0 gradients, 9.2 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  3.75it/s]
+#                    all        150        256      0.683      0.406      0.494       0.21
+#                   Fire        150        256      0.683      0.406      0.494       0.21
+# dataset fire
+# 100 epochs completed in 0.678 hours.
+# Optimizer stripped from runs/train/exp11/weights/last.pt, 6.5MB
+# Optimizer stripped from runs/train/exp11/weights/best.pt, 6.5MB
+
+# Validating runs/train/exp11/weights/best.pt...
+# Fusing layers... 
+# YOLOv5s summary: 123 layers, 3072630 parameters, 0 gradients, 9.1 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 5/5 [00:01<00:00,  4.06it/s]
+#                    all        150        256      0.586      0.496      0.485      0.205
+
+# YOLOv5 🚀 by Ultralytics, AGPL-3.0 license
+
+# Parameters
+
+# nc: 1 # number of classes
+# depth_multiple: 0.33 # model depth multiple
+# width_multiple: 0.50 # layer channel multiple
+# anchors:
+#   - [10, 13, 16, 30, 33, 23] # P3/8
+#   - [30, 61, 62, 45, 59, 119] # P4/16
+#   - [116, 90, 156, 198, 373, 326] # P5/32
+
+# backbone:
+#   # [from, number, module, args]
+#   [
+#     [-1, 1, Conv, [64, 6, 2, 2]], # 0-P1/2
+#     [-1, 1, Conv, [128, 3, 2]], # 1-P2/4
+#     [-1, 3, C3, [128]],
+#     [-1, 1, Conv, [256, 3, 2]], # 3-P3/8
+#     [-1, 6, C3, [256]],
+#     [-1, 1, Conv, [512, 3, 2]], # 5-P4/16
+#     [-1, 9, C3, [512]],
+#     [-1, 1, Conv, [1024, 3, 2]], # 7-P5/32
+#     [-1, 3, C3, [1024]],
+#     [-1, 1, SPPF, [1024, 5]], # 9
+#   ]
+
+# # YOLOv5 v6.0 head
+# head: [
+#     [-1, 1, Conv, [512, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 6], 1, Concat, [1]], # cat backbone P4
+#     [-1, 3, C3, [512, False]], # 13
+
+#     [-1, 1, Conv, [256, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 4], 1, Concat, [1]], # cat backbone P3
+#     [-1, 3, C3, [256, False]], # 17 (P3/8-small)
+
+#     [-1, 1, Conv, [256, 3, 2]],
+#     [[-1, 14], 1, Concat, [1]], # cat head P4
+#     [-1, 3, C3, [512, False]], # 20 (P4/16-medium)
+
+#     [-1, 1, Conv, [512, 3, 2]],
+#     [[-1, 10], 1, Concat, [1]], # cat head P5
+#     [-1, 3, C3, [1024, False]], # 23 (P5/32-large)
+
+#     [[17, 20, 23], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5)
+#   ]

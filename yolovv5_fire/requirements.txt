@@ -1,0 +1,6 @@
+comet_ml
+torch
+torchvision
+numpy
+pillow
+matplotlib

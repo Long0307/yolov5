@@ -1,0 +1,565 @@
+# # YOLOv5 🚀 by Ultralytics, AGPL-3.0 license
+
+# # Parameters
+
+# nc: 1 # number of classes
+# depth_multiple: 0.33 # model depth multiple
+# width_multiple: 0.50 # layer channel multiple
+# anchors:
+#   - [10, 13, 16, 30, 33, 23] # P3/8
+#   - [30, 61, 62, 45, 59, 119] # P4/16
+#   - [116, 90, 156, 198, 373, 326] # P5/32
+
+# backbone:
+#   # [from, number, module, args]
+#   [
+#     [-1, 1, Conv, [64, 6, 2, 2]], # 0-P1/2
+#     [-1, 1, Conv, [128, 3, 2]], # 1-P2/4
+#     [-1, 3, C3, [128]],
+#     [-1, 1, Conv, [256, 3, 2]], # 3-P3/8
+#     [-1, 6, C3, [256]],
+#     [-1, 1, Conv, [512, 3, 2]], # 5-P4/16
+#     [-1, 9, C3, [512]],
+#     [-1, 1, GhostConv, [1024, 3, 2]], # 7-P5/32
+#     [-1, 3, C3Ghost, [1024]],
+#     [-1, 1, SPPF, [1024, 5]], # 10
+#   ]
+
+# # YOLOv5 v6.0 head
+# head: [
+#     [-1, 1, Conv, [512, 1, 1]],
+#     [-1, 1, CABottleneck, [256, 256]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 6], 1, Concat, [1]], # cat backbone P4
+#     [-1, 3, C3, [512, 512]], # 13
+
+#     [-1, 1, Conv, [256, 1, 1]],
+#     [-1, 1, CABottleneck, [128, 128]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 4], 1, Concat, [1]], # cat backbone P3
+#     [-1, 3, C3Ghost, [256, False]], # 17 (P3/8-small)
+#     [-1, 1, CABottleneck, [128, 128,3]],
+
+#     [-1, 1, Conv, [256, 3, 2]],
+#     [[-1, 14], 1, Concat, [1]], # cat head P4
+#     [-1, 3, C3Ghost, [512, False]], # 20 (P4/16-medium)
+#     [-1, 1, CABottleneck, [256, 256,3]],
+
+#     [-1, 1, Conv, [512, 3, 2]],
+#     [[-1, 10], 1, Concat, [1]], # cat head P5
+#     [-1, 3, C3Ghost, [512, 512]], # 23 (P5/32-large)
+#     [-1, 1, CABottleneck, [256, 256,3]],
+
+#     [[20, 25, 29], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5)
+#   ]
+
+
+nc: 1 # number of classes
+depth_multiple: 0.33 # model depth multiple
+width_multiple: 0.50 # layer channel multiple
+anchors:
+  - [10, 13, 16, 30, 33, 23] # P3/8
+  - [30, 61, 62, 45, 59, 119] # P4/16
+  - [116, 90, 156, 198, 373, 326] # P5/32
+
+backbone:
+  # [from, number, module, args]
+  [
+    [-1, 1, Conv, [64, 3, 2]], # 0-P1/2
+    # [-1, 1, Conv, [64, 6, 2, 2]], # 0-P1/2
+    [-1, 1, Conv, [128, 3, 2]], # 1-P2/4
+    [-1, 3, C3ICS, [64, 64, 1]],
+
+    [-1, 1, Conv, [256, 3, 2]], # 3-P3/8
+    [-1, 6, C3ICS, [128, 128, 2]],
+
+    [-1, 1, Conv, [512, 3, 2]], # 5-P4/16
+    [-1, 9, C3ICS, [256, 256, 3]],
+
+    [-1, 1, GhostConv, [1024, 3, 2]], # 7-P5/32
+    [-1, 3, C3Ghost, [1024]],
+    # [-1, 3, SE_Block, [512,3]], # danh dau ==
+    # [-1, 3, CBAM, [512,512,3]], # danh dau ==
+    [-1, 1, SPPF, [1024, 5]], # 9
+  ]
+
+# YOLOv5 v6.0 head
+head: [
+    [-1, 1, Conv, [512, 1, 1]],
+    [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+    [[-1, 6], 1, Concat, [1]], # cat backbone P4
+    [-1, 3, C3, [512, 512]], # 13
+
+    [-1, 1, Conv, [256, 1, 1]],
+    [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+    [[-1, 4], 1, Concat, [1]], # cat backbone P3
+    [-1, 3, C3, [256, 256]], # 17 (P5/32-large)
+    [-1, 3, CBAM, [128, 128,3]], # 18
+
+    [-1, 1, Conv, [256, 3, 2]], # 19
+    [[-1, 14], 1, Concat, [1]], # cat head P4
+    [-1, 3, C3, [256, 256]], # 21 (P5/32-large)
+    [-1, 3, CBAM, [128, 128,3]], # 22
+
+    [-1, 1, Conv, [512, 3, 2]], #23
+    [[-1, 10], 1, Concat, [1]], # cat head P5
+    [-1, 3, C3, [512, 512]], # 25 (P5/32-large)
+    [-1, 3, CBAM, [256, 256,3]], # 26
+
+    [[18, 22, 26], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5) de y them
+  ]
+
+# head: [
+#     [-1, 1, Conv, [512, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 6], 1, Concat, [1]], # cat backbone P4
+#     [-1, 3, C3, [512, False]], # 13
+
+#     [-1, 1, Conv, [256, 1, 1]],
+#     [-1, 1, nn.Upsample, [None, 2, "nearest"]],
+#     [[-1, 4], 1, Concat, [1]], # cat backbone P3
+#     [-1, 3, C3, [256, False]], # 17 (P3/8-small)
+
+#     [-1, 1, Conv, [256, 3, 2]],
+#     [[-1, 14], 1, Concat, [1]], # cat head P4
+#     [-1, 3, C3, [512, False]], # 20 (P4/16-medium)
+
+#     [-1, 1, Conv, [512, 3, 2]],
+#     [[-1, 10], 1, Concat, [1]], # cat head P5
+#     [-1, 3, C3, [1024, False]], # 23 (P5/32-large)
+
+#     [[17, 20, 23], 1, Detect, [nc, anchors]], # Detect(P3, P4, P5)
+#   ]
+
+
+#   100 epochs completed in 1.574 hours.
+# Optimizer stripped from runs/train/exp163/weights/last.pt, 15.0MB
+# Optimizer stripped from runs/train/exp163/weights/best.pt, 15.0MB
+
+# Validating runs/train/exp163/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 437 layers, 7191301 parameters, 0 gradients, 22.6 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.83it/s]
+#                    all        874        920      0.852      0.795      0.839      0.514
+# Results saved to runs/train/exp163
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/23141197f7d441e2814bc9c2bd622a05
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.4515814781188965, 2.1835246086120605)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0014304807257887586, 0.8512543380942907)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (0.0003777426403107201, 0.5140286058993857)
+# COMET INFO:     metrics/precision [200]    : (0.0010183066361556063, 0.8764001442658721)
+# COMET INFO:     metrics/recall [200]       : (0.16847826086956522, 0.8010869565217391)
+# COMET INFO:     train/box_loss [200]       : (0.03182465583086014, 0.09966886043548584)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.006999068893492222, 0.01949550025165081)
+# COMET INFO:     val/box_loss [200]         : (0.03931061178445816, 0.09691937267780304)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004320842679589987, 0.010527610778808594)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:\
+
+
+# 100 epochs completed in 1.573 hours.
+# Optimizer stripped from runs/train/exp166/weights/last.pt, 15.0MB
+# Optimizer stripped from runs/train/exp166/weights/best.pt, 15.0MB
+
+# Validating runs/train/exp166/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 437 layers, 7191301 parameters, 0 gradients, 22.6 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.81it/s]
+#                    all        874        920      0.859      0.789      0.846       0.51
+# Results saved to runs/train/exp166
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/2c50a295bf9047ff97d48c1028216ddc
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.45342397689819336, 2.1835246086120605)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0011034206151279565, 0.8461297020067394)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (0.0003013367344540411, 0.5107472876134745)
+# COMET INFO:     metrics/precision [200]    : (0.0009763539282990084, 0.8688714478927073)
+# COMET INFO:     metrics/recall [200]       : (0.02826086956521739, 0.8141304347826087)
+# COMET INFO:     train/box_loss [200]       : (0.0316191241145134, 0.09955663233995438)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.00696000037714839, 0.019488435238599777)
+# COMET INFO:     val/box_loss [200]         : (0.03914784640073776, 0.09553537517786026)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004342607222497463, 0.009523711167275906)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+
+# 100 epochs completed in 1.560 hours.
+# Optimizer stripped from runs/train/exp169/weights/last.pt, 14.6MB
+# Optimizer stripped from runs/train/exp169/weights/best.pt, 14.6MB
+
+# Validating runs/train/exp169/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 446 layers, 7003365 parameters, 0 gradients, 21.3 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.75it/s]
+#                    all        874        920      0.844      0.795      0.835      0.513
+# Results saved to runs/train/exp169
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Cometrics/precision [200]    : (0.0010678871090770404, 0.8548105137252424)
+# COMET INFO:     metrics/recall [200]       : (0.1282608695652174, 0.8208228609043826)
+# COMET INFO:     train/box_loss [200]       : (0.03177083656191826, 0.09898899495601654)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.006917321123182774, 0.019202010706067085)
+# COMET INFO:     val/box_loss [200]         : (0.03882209584116936, 0.09455103427171707)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004284995142370462, 0.009409165941178799)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     u
+
+
+# 100 epochs completed in 1.160 hours.
+# Optimizer stripped from runs/train/exp170/weights/last.pt, 12.1MB
+# Optimizer stripped from runs/train/exp170/weights/best.pt, 12.1MB
+
+# Validating runs/train/exp170/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 350 layers, 5803919 parameters, 0 gradients, 14.9 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:06<00:00,  4.62it/s]
+#                    all        874        920       0.86      0.787      0.832      0.505
+# Results saved to runs/train/exp170
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/1364ed643caf427bb1d9ab18fbc60707
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.47495853900909424, 2.147115707397461)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0014655446609075694, 0.8363784236884988)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (0.00039562189910053846, 0.5054809459961233)
+# COMET INFO:     metrics/precision [200]    : (0.0009458428680396644, 0.8680397399957451)
+# COMET INFO:     metrics/recall [200]       : (0.05434782608695652, 0.8)
+# COMET INFO:     train/box_loss [200]       : (0.032752782106399536, 0.09933660179376602)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.007179502863436937, 0.018961545079946518)
+# COMET INFO:     val/box_loss [200]         : (0.03983424976468086, 0.09549553692340851)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004320480860769749, 0.009487228468060493)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+# backbone:
+#   # [from, number, module, args]
+#   [
+#     [-1, 1, Conv, [64, 3, 2]], # 0-P1/2
+#     # [-1, 1, Conv, [64, 6, 2, 2]], # 0-P1/2
+#     [-1, 1, GhostConv, [128, 3, 2]], # 1-P2/4
+#     [-1, 3, C3ICS, [64, 64, 1]],
+
+#     [-1, 1, GhostConv, [256, 3, 2]], # 3-P3/8
+#     [-1, 6, C3ICS, [128, 128, 2]],
+
+#     [-1, 1, GhostConv, [512, 3, 2]], # 5-P4/16
+#     [-1, 9, C3ICS, [256, 256, 3]],
+
+#     [-1, 1, GhostConv, [1024, 3, 2]], # 7-P5/32
+#     [-1, 3, C3Ghost, [1024]],
+#     [-1, 3, SE_Block, [512,3]], # danh dau ==
+#     # [-1, 3, CBAM, [512,512,3]], # danh dau ==
+#     [-1, 1, SPPF, [1024, 5]], # 10
+#   ]
+
+# 100 epochs completed in 1.505 hours.
+# Optimizer stripped from runs/train/exp178/weights/last.pt, 13.9MB
+# Optimizer stripped from runs/train/exp178/weights/best.pt, 13.9MB
+
+# Validating runs/train/exp178/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 391 layers, 6670063 parameters, 0 gradients, 20.0 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.90it/s]
+#                    all        874        920      0.868      0.782      0.838      0.515
+# Results saved to runs/train/exp178
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/53894090d1344640ab7c965d275dc4c4
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.4755436182022095, 2.1961019039154053)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.00029694557466589317, 0.8457002611397652)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (7.919472587233515e-05, 0.5146093490243892)
+# COMET INFO:     metrics/precision [200]    : (0.0004347826086956522, 0.8772709103907228)
+# COMET INFO:     metrics/recall [200]       : (0.12391304347826088, 0.7967391304347826)
+# COMET INFO:     train/box_loss [200]       : (0.03206196427345276, 0.10482719540596008)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.007040468510240316, 0.024261314421892166)
+# COMET INFO:     val/box_loss [200]         : (0.03937501087784767, 0.11882643401622772)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.00436688307672739, 0.02090674638748169)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+# 100 epochs completed in 1.479 hours.
+# Optimizer stripped from runs/train/exp179/weights/last.pt, 13.4MB
+# Optimizer stripped from runs/train/exp179/weights/best.pt, 13.4MB
+
+# Validating runs/train/exp179/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 384 layers, 6414063 parameters, 0 gradients, 19.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:06<00:00,  4.02it/s]
+#                    all        874        920       0.83       0.78      0.832      0.515
+# Results saved to runs/train/exp179
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/f3db5e83f47945d48bb597440856910c
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.48715418577194214, 2.238603115081787)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0003238654084369374, 0.8419660999407697)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (9.408785197060795e-05, 0.5151074203918801)
+# COMET INFO:     metrics/precision [200]    : (0.0007017543859649122, 0.8603845782754206)
+# COMET INFO:     metrics/recall [200]       : (0.009782608695652175, 0.8010869565217391)
+# COMET INFO:     train/box_loss [200]       : (0.031821057200431824, 0.10442642122507095)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.00701315701007843, 0.02450856752693653)
+# COMET INFO:     val/box_loss [200]         : (0.03894634172320366, 0.11474677175283432)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.0042833262123167515, 0.01392717007547617)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+
+# 100 epochs completed in 1.380 hours.
+# Optimizer stripped from runs/train/exp181/weights/last.pt, 12.9MB
+# Optimizer stripped from runs/train/exp181/weights/best.pt, 12.9MB
+
+# Validating runs/train/exp181/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 366 layers, 6168623 parameters, 0 gradients, 18.5 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:06<00:00,  4.23it/s]
+#                    all        874        920       0.85       0.79      0.836      0.511
+# Results saved to runs/train/exp181
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/4d24d8f10c76417e989a524d9ad63b6e
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.45378372073173523, 2.3126380443573)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0010473880441230427, 0.845273857754033)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (0.00021931367420736984, 0.5112232898584758)
+# COMET INFO:     metrics/precision [200]    : (0.0006712433257055683, 0.865895721476683)
+# COMET INFO:     metrics/recall [200]       : (0.19130434782608696, 0.8065217391304348)
+# COMET INFO:     train/box_loss [200]       : (0.0319451168179512, 0.10343173146247864)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.007021771743893623, 0.024612249806523323)
+# COMET INFO:     val/box_loss [200]         : (0.03872258588671684, 0.10179335623979568)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004339618142694235, 0.013825987465679646)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+
+# 100 epochs completed in 1.394 hours.
+# Optimizer stripped from runs/train/exp182/weights/last.pt, 12.9MB
+# Optimizer stripped from runs/train/exp182/weights/best.pt, 12.9MB
+
+# Validating runs/train/exp182/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 366 layers, 6168623 parameters, 0 gradients, 18.5 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.96it/s]
+#                    all        874        920       0.87      0.777      0.842      0.515
+# Results saved to runs/train/exp182
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/4c78cdd792ba45d7a4cc8b5304a52906
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.46937307715415955, 2.3126380443573)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0011465870227723065, 0.8416193101035242)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (0.0003232925458433962, 0.514513746055338)
+# COMET INFO:     metrics/precision [200]    : (0.0009038901601830663, 0.8742121678692937)
+# COMET INFO:     metrics/recall [200]       : (0.21195652173913043, 0.7978260869565217)
+# COMET INFO:     train/box_loss [200]       : (0.031566910445690155, 0.10346515476703644)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.006970215123146772, 0.024538038298487663)
+# COMET INFO:     val/box_loss [200]         : (0.03842407464981079, 0.10309768468141556)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004283130168914795, 0.013452963903546333)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+# 100 epochs completed in 1.371 hours.
+# Optimizer stripped from runs/train/exp183/weights/last.pt, 12.9MB
+# Optimizer stripped from runs/train/exp183/weights/best.pt, 12.9MB
+
+# Validating runs/train/exp183/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 366 layers, 6168623 parameters, 0 gradients, 18.5 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:06<00:00,  4.29it/s]
+#                    all        874        920      0.845      0.788      0.835      0.516
+# Results saved to runs/train/exp183
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/eb6632c48b6a4a858b96ac8e65f52091
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.44612687826156616, 2.3126380443573)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.00035358124122373646, 0.840345326006512)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (8.767424838475784e-05, 0.5157818918045797)
+# COMET INFO:     metrics/precision [200]    : (0.0005453852021357742, 0.8535164811628649)
+# COMET INFO:     metrics/recall [200]       : (0.15543478260869564, 0.8111466539002771)
+# COMET INFO:     train/box_loss [200]       : (0.03161299601197243, 0.10305307805538177)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.006930488161742687, 0.02456924505531788)
+# COMET INFO:     val/box_loss [200]         : (0.038948141038417816, 0.10264228284358978)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004323927219957113, 0.01330830343067646)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+
+
+# 100 epochs completed in 1.459 hours.
+# Optimizer stripped from runs/train/exp191/weights/last.pt, 13.4MB
+# Optimizer stripped from runs/train/exp191/weights/best.pt, 13.4MB
+
+# Validating runs/train/exp191/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 384 layers, 6414063 parameters, 0 gradients, 19.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.91it/s]
+#                    all        874        920       0.83      0.788      0.828       0.51
+# Results saved to runs/train/exp191
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/579916a4fd2c44a29755d32b41d69e3a
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.4817032217979431, 2.238603115081787)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0003899399303249658, 0.8310203411914519)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (0.00010860541501082484, 0.5098623084916653)
+# COMET INFO:     metrics/precision [200]    : (0.0006750572082379863, 0.8601581613613342)
+# COMET INFO:     metrics/recall [200]       : (0.017391304347826087, 0.7946628693911303)
+# COMET INFO:     train/box_loss [200]       : (0.03223865479230881, 0.1043194830417633)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.0071727740578353405, 0.024558139964938164)
+# COMET INFO:     val/box_loss [200]         : (0.03840457275509834, 0.11103121191263199)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.0043304115533828735, 0.013174916617572308)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+
+# 100 epochs completed in 1.689 hours.
+# Optimizer stripped from runs/train/exp194/weights/last.pt, 17.0MB
+# Optimizer stripped from runs/train/exp194/weights/best.pt, 17.0MB
+
+# Validating runs/train/exp194/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 414 layers, 8189868 parameters, 0 gradients, 24.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.60it/s]
+#                    all        874        920      0.843      0.784      0.835      0.504
+# Results saved to runs/train/exp194
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/80e2de75ba444079835726d10a8a182d
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.4605781137943268, 2.184300422668457)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0003252867022125293, 0.8393242006251243)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (8.870000528000786e-05, 0.5043487847756503)
+# COMET INFO:     metrics/precision [200]    : (0.0005110602593440122, 0.8574111401850844)
+# COMET INFO:     metrics/recall [200]       : (0.14565217391304347, 0.8065217391304348)
+# COMET INFO:     train/box_loss [200]       : (0.03161115571856499, 0.10362356156110764)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.006911810953170061, 0.023368090391159058)
+# COMET INFO:     val/box_loss [200]         : (0.03884054347872734, 0.10230816155672073)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004348007496446371, 0.013525724411010742)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
+
+# 100 epochs completed in 1.771 hours.
+# Optimizer stripped from runs/train/exp196/weights/last.pt, 15.4MB
+# Optimizer stripped from runs/train/exp196/weights/best.pt, 15.4MB
+
+# Validating runs/train/exp196/weights/best.pt...
+# Fusing layers... 
+# ghostbtl summary: 462 layers, 7368069 parameters, 0 gradients, 24.8 GFLOPs
+#                  Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 28/28 [00:07<00:00,  3.54it/s]
+#                    all        874        920      0.849      0.798       0.84      0.518
+# Results saved to runs/train/exp196
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO: Comet.ml Experiment Summary
+# COMET INFO: ---------------------------------------------------------------------------------------
+# COMET INFO:   Data:
+# COMET INFO:     display_summary_level : 1
+# COMET INFO:     name                  : exp
+# COMET INFO:     url                   : https://www.comet.com/long0307/yolov5/5c1b0c1df5d544f5986b8236f47338e8
+# COMET INFO:   Metrics [count] (min, max):
+# COMET INFO:     loss [2170]                : (0.4581197202205658, 2.208280086517334)
+# COMET INFO:     metrics/mAP_0.5 [200]      : (0.0002936467115304997, 0.8426645769238345)
+# COMET INFO:     metrics/mAP_0.5:0.95 [200] : (7.940206340787774e-05, 0.5186282630133489)
+# COMET INFO:     metrics/precision [200]    : (0.0005034324942791762, 0.8748379574798115)
+# COMET INFO:     metrics/recall [200]       : (0.04456521739130435, 0.8119565217391305)
+# COMET INFO:     train/box_loss [200]       : (0.03169267252087593, 0.10299555212259293)
+# COMET INFO:     train/cls_loss             : 0.0
+# COMET INFO:     train/obj_loss [200]       : (0.006937770172953606, 0.023179916664958)
+# COMET INFO:     val/box_loss [200]         : (0.03878485783934593, 0.10214623063802719)
+# COMET INFO:     val/cls_loss               : 0.0
+# COMET INFO:     val/obj_loss [200]         : (0.004244067706167698, 0.01363674271851778)
+# COMET INFO:     x/lr0 [200]                : (0.0002980000000000002, 0.07013761467889909)
+# COMET INFO:     x/lr1 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:     x/lr2 [200]                : (0.0002980000000000002, 0.009787012232415902)
+# COMET INFO:   Others:
